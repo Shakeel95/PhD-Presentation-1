@@ -17,7 +17,7 @@ Depends on R (>= 3.6). To make sure all packages needed to execute scrips in the
 
 ``` R 
 str(ip <- installed.packages()) 
-rp <- scan("required.txt",what="", sep = "\n")
+rp <- scan("required.txt", what = "", sep = "\n")
 
 sapply(rp, function(i) if (!(i %in% rownames(ip))) install.packages(i))
 ```
