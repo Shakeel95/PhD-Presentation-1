@@ -22,6 +22,8 @@ contrast <- function(b, s, e){
 
 
 #----------------------------
+# LOCALISED GREEDY SEARCH 
+#
 # set up signal + noise model
 #----------------------------
 
@@ -29,7 +31,7 @@ contrast <- function(b, s, e){
 # mk model 
 set.seed(123)
 n <- 150  
-signal.clean <- c(0.5*(1:50),rep(25,50),25-0.5*(1:50)) 
+signal.clean <- c(0.5*(1:50),rep(25,50),25-0.5*(1:50))
 signal.noisy <- signal.clean + rnorm(n, sd = 2)
 
 
@@ -40,6 +42,8 @@ CUSUM.noisy <- numeric(n)
 
 
 #---------------------------
+# LOCALISED GREEDY SEARCH
+#
 # Loop over frames, make gif
 #---------------------------
 
@@ -48,8 +52,8 @@ if (!dir.exists("plots/pscwLin_CUSUM_gif")) dir.create("./plots/pscwLin_CUSUM_gi
 
 for (i in 2:(n-2)){
   
-  # set plotting options 
-  name <- paste("plots/pscwLin_CUSUM_gif/CUSUM_", i,'.png', sep='')
+  # set plotting options, save png 
+  name <- paste("plots/pscwLin_CUSUM_gif/CUSUM_", i, ".png", sep = "")
   png(file = name)
   layout(matrix(c(1,1,1,3,1,1,1,3,2,2,2,3), nrow = 3, byrow = T))
   
@@ -88,3 +92,109 @@ for (i in 2:(n-2)){
   
   dev.off()
 }
+
+
+
+#-------------------------
+# ILLUSTRATING TGUW
+#
+# Set up model, transform
+#-------------------------
+
+# mk model
+signal.clean <- c(0.5*(1:25), 12.5 - 0.5*(1:25))
+n <- length(signal.clean)
+signal.noisy <- signal.clean + rnorm(n)
+
+
+# 
+signal.transformed <- signal.noisy
+detail.coef <- numeric(n)
+
+
+# transform
+tguwfit <- TGUW(signal.noisy, p = 0)
+
+
+
+#---------------------------
+# LOCALISED GREEDY SEARCH
+#
+# Loop over frames, make gif
+#---------------------------
+
+
+if (!dir.exists("plots/TGUW_gif")) dir.create("./plots/TGUW_gif")
+
+j <- 1 
+
+for (i in 1:(n-2)) {
+  
+  
+  # set plotting options, save png
+  name <- paste("plots/TGUW_gif/TGUW_", j, ".png", sep = "")
+  png(file = name)
+  layout(matrix(c(1,1,1,2,1,1,1,2,1,1,1,3), nrow = 3, byrow = TRUE))
+  j <- j+1
+  
+  
+  # extract itter transform
+  mg <- tguwfit$merging.hist[,,i]
+  s <- mg[1,1]; b <- mg[1,2]; e <- mg[1,3]
+  l <- seq(mg[3,2], mg[3,3], length.out = e-s+1)
+  
+  
+  plot(1:n, signal.transformed,
+       type = "l", col = "grey", lwd = 4,
+       main = "TGUW Transform",
+       xlab = "Time", 
+       ylab = "Value"
+  )
+  abline(v = s, col = "blue")
+  abline(v = e, col = "blue")
+  lines(1:n,signal.noisy, col = "red", type = "l")
+  
+  
+  barplot(detail.coef, main = "Detail Coefs.", horiz=TRUE)
+
+    
+  plot(1, xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "max", col = "white")
+  text(x = 1, y = 1, paste(round(detail.coef, 1)[which.max(abs(detail.coef))]),cex = 3)
+  
+  dev.off()
+
+  
+  # update detail and smooth coefs
+  signal.transformed[s:b] <- l[1:(b-s+1)]
+  signal.transformed[(b+1):e] <- l[(b-s+2):(e-b+2)]
+  detail.coef[s:e] <- mg[3,1]
+
+
+  # set plotting options, save png
+  name <- paste("plots/TGUW_gif/TGUW_", j, ".png", sep = "")
+  png(file = name)
+  layout(matrix(c(1,1,1,2,1,1,1,2,1,1,1,3), nrow = 3, byrow = TRUE))
+  j <- j+1
+
+
+  plot(1:n, signal.transformed,
+       type = "l", col = "grey", lwd = 4,
+       main = "TGUW Transform",
+       xlab = "Time",
+       ylab = "Value"
+  )
+  abline(v = s, col = "blue")
+  abline(v = e, col = "blue")
+  lines(1:n,signal.noisy, col = "red", type = "l", horiz=TRUE)
+
+
+  barplot(detail.coef, main = "Detail Coefs.", horiz=TRUE)
+  
+  plot(1, xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "max", col = "white")
+  text(x = 1, y = 1, paste(round(detail.coef, 1)[which.max(abs(detail.coef))]),cex = 3)
+  
+  dev.off()
+  
+}
+
+
