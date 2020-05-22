@@ -1,0 +1,102 @@
+\documentclass{beamer}
+
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+\mode<presentation>
+{
+  \usetheme{Madrid}       % or try default, Darmstadt, Warsaw, ...
+  \usecolortheme{default} % or try albatross, beaver, crane, ...
+  \usefonttheme{serif}    % or try default, structurebold, ...
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+} 
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{chemfig}
+\usepackage[version=3]{mhchem}
+
+\usepackage{hyperref}
+\usepackage{natbib}
+\bibliographystyle{agsm}
+
+\usepackage{animate}
+\usepackage{xmpmulti}
+
+
+\title[Trend Segmentation]{Uses of High Dimensional Trend Segmentation}
+\institute[LSE Department of Statistics]{}
+
+\date[8 May 2017]{
+  \hspace{1cm}\\
+  PhD Presentation Event\\
+  \hspace{1cm}\\
+  \href{https://github.com/Shakeel95/PhD-Presentation-1}{GitHub}}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+\begin{frame}{Roadmap}
+  \tableofcontents
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 1: Motivation %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Motivation}
+
+
+%%% Table of contents %%%
+
+\begin{frame}{Roadmap}
+\tableofcontents[currentsection]
+\end{frame}
+
+
+\begin{frame}{Model Setup}
+
+Univariate: $X_t = f(t) + \varepsilon_t$ with $\varepsilon_t \sim \left ( 0, \sigma^2 \right )$ and weakly dependent and $f(t)$ piecewise linear on $[1,T]$ having kinks at $\tau_1,..., \tau_N$: 
+
+\begin{equation*}
+    f(t) = 
+    \left\{\begin{matrix}
+            \theta_{1,\tau_1} + t \cdot \theta_{2,\tau_1} & t \in [1, \tau_1) \\ 
+            \theta_{1,\tau_2} + t \cdot \theta_{2,\tau_2} & t \in [\tau_2, \tau_3)\\ 
+            \vdots & \\ 
+            \theta_{1,\tau_N} + t \cdot \theta_{2,\tau_N} & t \in [\tau_N,T]
+    \end{matrix}\right.
+\end{equation*}
+
+Multivariate: $\boldsymbol{X_t} = \boldsymbol{F}(t) + \boldsymbol{\varepsilon}_t$ with $\boldsymbol{\varepsilon}_t \sim \left ( \boldsymbol{0}, \Sigma_{n \times n} \right )$
+
+$\boldsymbol{X_t} = \left ( X_{1,t},...,X_{n,t}\right )'$ where each $X_j$ is as above and $\boldsymbol{F}(t) = \left ( f_1(t), ..., f_n(t)\right )'$ and the functions $\left \{ f_i\right \}_{i=1}^n$ share common kinks $\tau_1,..., \tau_N$.
+
+\end{frame}
+
+
+\begin{frame}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{../plots/TGUW_gif/TGUW_1}
+    \label{model 3 cov}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}
+\begin{figure}[h]
+	\centering
+	\animategraphics[loop,controls,width=0.55\linewidth]{5}{../plots/TGUW_gif/TGUW_}{1}{96}
+\end{figure}
+\end{frame}
+
+\end{document}
+\end{frame}
+
+\end{document}
