@@ -13,7 +13,7 @@ The final part of the talk will propose a factor model framework for high dimens
 
 ## Usage
 
-Depends on R (>= 3.6). To make sure all packages needed to execute scrips in the repository are installed do: 
+To generate plots used in the presentation run `section_{}.R` files in `R` sequentially with the repository as dir. Depends on R (>= 3.6). To make sure all packages needed to execute scrips in the repository are installed do: 
 
 ``` R 
 str(ip <- installed.packages()) 
@@ -21,3 +21,5 @@ rp <- scan("required.txt", what = "", sep = "\n")
 
 sapply(rp, function(i) if (!(i %in% rownames(ip))) install.packages(i))
 ```
+
+To make the presentation itself build `year_1_PhD_presentation.tex` inside `.\tex`. 
