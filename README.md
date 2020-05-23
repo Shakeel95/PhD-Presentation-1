@@ -1,6 +1,6 @@
 # PhD-Presentation-1
 
-This repository contains code for building my my first year PhD presentation.
+This repository contains code for building my first year PhD presentation, given at the LSE Statistics Department [2020 PhD presentation event](http://www.lse.ac.uk/Statistics/Study/PhD-MPhil/PhD-presentation-events-and-Research-posters). 
 
 ## Abstract 
 
