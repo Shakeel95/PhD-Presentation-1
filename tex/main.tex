@@ -1,0 +1,659 @@
+\documentclass{beamer}
+
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+\mode<presentation>
+{
+  \usetheme{Madrid}       % or try default, Darmstadt, Warsaw, ...
+  \usecolortheme{default} % or try albatross, beaver, crane, ...
+  \usefonttheme{serif}    % or try default, structurebold, ...
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+} 
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{chemfig}
+\usepackage[version=3]{mhchem}
+
+\usepackage{hyperref}
+\usepackage{natbib}
+\bibliographystyle{agsm}
+
+\usepackage{setspace}
+
+\usepackage{animate}
+\usepackage{xmpmulti}
+
+
+\title[Trend Segmentation]{Uses of High Dimensional Trend Segmentation}
+\institute[LSE Department of Statistics]{}
+
+\author[Shakeel Gavioli-Akilagun]{
+\\
+  {Shakeel Gavioli-Akilagun} \\
+  \bigskip
+  \footnotesize{Supervisors: Prof. Piotr Fryzlewicz / Dr. Clifford Lam}
+}
+
+\date[02 June 2020]{
+  \hspace{1cm}\\
+  PhD Presentation Event\\
+  \hspace{1cm}\\
+  {\fontfamily{pcr}\selectfont \href{https://github.com/Shakeel95/PhD-Presentation-1}{GitHub} }
+}
+
+\begin{document}
+
+
+
+%%% Title Page %%% 
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+
+%%% Table of contents %%%
+
+\begin{frame}{Roadmap}
+  \tableofcontents
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 1: Motivation %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Motivation}
+
+
+
+%%% Table of contents %%%
+
+\begin{frame}{Roadmap}
+\tableofcontents[currentsection]
+\end{frame}
+
+
+
+
+
+%%% Model Setup %%%
+
+\begin{frame}{Model Setup}
+\framesubtitle{Univariate trend segmentation}
+
+Given a sample $\left \{ X_t \right \}_{t=1}^{T}$ assume a `signal + noise' model $X_t = f(t) + \varepsilon_t$ with $\varepsilon_t \sim \left ( 0, \sigma^2 \right )$ and $f(t)$ can be segmented into $N+1$ linear segments with breaks at $1 = \tau_0 < \tau_1 < \dots \tau_N < \tau_{N+1}=T$. Specifically: 
+
+\bigskip
+
+\begin{equation*}
+f(t) = 
+\left\{\begin{matrix}
+        \theta_{1,\tau_1} + t \cdot \theta_{2,\tau_1} & t \in [1, \tau_1) \\ 
+        \theta_{1,\tau_2} + t \cdot \theta_{2,\tau_2} & t \in [\tau_2, \tau_3)\\ 
+        \vdots & \\ 
+        \theta_{1,\tau_N} + t \cdot \theta_{2,\tau_N} & t \in [\tau_N,T]
+\end{matrix}\right.
+\end{equation*}
+
+\bigskip
+
+Both $N$ and $\left \{ \tau_1, \dots \tau_N \right \}$ are unknown.
+
+\end{frame}
+
+
+
+%%% Multivariate trend segmentation %%%
+
+\begin{frame}{Model Setup}
+\framesubtitle{Multivariate trend segmentation}
+
+From a sample $\left \{ \boldsymbol{X}_t \right \}_{t=1}^T$ assume a multivariate `signal + noise' model $\boldsymbol{X_t} = \boldsymbol{F}(t) + \boldsymbol{\varepsilon}_t$ with $\boldsymbol{\varepsilon}_t \sim \left ( \boldsymbol{0}, \Sigma \right )$ and $\boldsymbol{F}(t)$ is the concatenation of $n$ piecewise constant function. Specifically: 
+
+\bigskip
+
+\begin{itemize}
+    \item $\boldsymbol{X_t} = \left ( X_{1,t},...,X_{n,t}\right )'$
+    \item $\boldsymbol{F}(t) = \left ( f_1(t), ..., f_n(t)\right )'$
+    \item $\left \{ f_i\right \}_{i=1}^n$ share common changepoints $\left \{ \tau_j \right \} _{j=1}^N$
+\end{itemize}
+
+\bigskip
+
+We may have that $T \ll n$. 
+
+\end{frame}
+
+%%% Modelling Objectives %%%
+
+\begin{frame}{Model Setup}
+\framesubtitle{Objectives of trend segmentation}
+
+\doublespacing
+The goal is to construct estimates $\left ( \boldsymbol{\widehat{\theta}}, \boldsymbol{\widehat{f}} \right )$ where $\boldsymbol{f} = \left \{ f(t) \right \}_{t=1}^T$ and  $\boldsymbol{\widehat{\theta}} = \left ( \widehat{N}, \widehat{\tau}_1, ..., \widehat{\tau}_{\widehat{N}}, \right )$ which allow us to perform one or both of the following tasks with some guarantee of statistical accuracy.
+
+\bigskip
+
+\begin{enumerate}
+    \item Changepoint recovery $\mathbb{P} \left ( \widehat{N} = N, \underset{j}{\max} \left | \widhat{\tau_j} - \tau_j \right | \leq g(T) \right ) \rightarrow 1 $
+    \item Signal recovery $\mathbb{P} \left ( \left \| \boldsymbol{\widehat{f} - f} \right \|_p \leq g(T) \right ) \rightarrow 1 $
+\end{enumerate}
+
+\end{frame}
+
+
+
+%%% Present motivating data example %%%
+
+\begin{frame}{Motivation for Trend Segmentation}
+\framesubtitle{S\&P 500 around COVID-19 outbreak}
+
+Opening prices and log-returns for all S\&P 500 constituents around the COVID-19 outbreak. It may be of interest to find groups of time series which responded similarly to the shock.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}
+        \includegraphics[width = 0.45\textwidth]{../plots/SnP500_raw_COVID.png}
+    \end{subfigure}
+    \begin{subfigure}
+        \includegraphics[width = 0.45\textwidth]{../plots/SnP500_LR_COVID.png}
+    \end{subfigure}
+\end{figure}
+
+\end{frame}
+
+
+
+%%% SnP Correlation Clustering %%%
+
+\begin{frame}{Motivation for Trend Segmentation}
+\framesubtitle{Clustering on instantaneous correlation of log-returns}
+
+A common first step in EDA. Transform time series to stationarity $x_t \equiv \Delta \log \left ( X_t \right )$, then measure distance as $d(X,Y) = 1-\left | \text{cor} \left ( x,y \right ) \right |$.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}
+        \includegraphics[width = 0.3\textwidth]{../plots/SnP500_cor_similar.png}
+    \end{subfigure}
+        \begin{subfigure}
+        \includegraphics[width = 0.3\textwidth]{../plots/SnP500_random_selection.png}
+    \end{subfigure}
+        \begin{subfigure}
+        \includegraphics[width = 0.3\textwidth]{../plots/SnP500_cor_dissimilar.png}
+    \end{subfigure}
+\end{figure}
+    
+\end{frame}
+
+
+
+%%% Model based clustering %%%
+
+\begin{frame}{Motivation for Trend Segmentation}
+\framesubtitle{Model based clustering}
+
+% $l_2$-distance between models introduced by \cite{piccolo1990distance} and generalised by \cite{otranto2004classifying}.
+
+Let $x_t \sim \text{GARCH}(p,q)$, under invertibility
+$x_t^2 = \sum_{i=1}^\infty \pi_{i} x_{t-i}^2 + \eta_{t}$. Measure distance as: $ d\left ( X, Y \right ) = \left \{ \sum_{i=1}^\infty \left ( \pi_{x,i} - \pi_{y,i} \right )^2 \right \}^{\frac{1}{2}}$. 
+
+\bigskip
+
+\begin{figure}
+    \centering
+    \begin{subfigure}
+        \includegraphics[width = 0.4\linewidth]{../plots/SnP500_garch_dissimilar_1.png}
+    \end{subfigure}
+    \begin{subfigure}
+        \includegraphics[width = 0.4\linewidth]{../plots/SnP500_garch_dissimilar_2.png}
+    \end{subfigure}\
+\end{figure}
+
+\end{frame}
+
+
+
+%%% Distance between changepoint skeletons %%%
+
+\begin{frame}{Motivation for Trend Segmentation}
+\framesubtitle{Distance between ``changepoint skeletons"}
+
+\begin{columns}
+
+    \begin{column}{0.6\textwidth}
+    {\small
+    A new measure based on changepoints and the Fréchet distance. Estimate the following: (1) underlying signal  $\widehat{f}: [1,T] \rightarrow \mathbb{R}$, and (2) scaled signal: $\widehat{Q}: [0,1] \rightarrow [0,1]$. Then:
+
+    \begin{align*}
+        d(X,Y) = \underset{\alpha,\beta}{\inf} \left \{ \underset{t \in [0,1]}{\max} \left \| \widehat{Q}_X\left ( \alpha(t) \right ) - \widehat{Q}_Y\left ( \beta(t) \right ) \right \| \right \}
+    \end{align*}
+    
+    \text{}
+    
+    Where $\alpha, \beta : [0,1] \rightarrow [0,1]$. Whole dissimilarity matrix can be computed in $\mathcal{O} \left ( n^2T \right )$ time. 
+    }
+    \end{column}
+    
+    \begin{column}{0.4\textwidth}
+    \begin{figure}
+        \centering
+        \includegraphics[width = 1\textwidth,left]{../plots/frechet_dist_illustration.jpg}
+    \end{figure}
+    \end{column}
+    
+\end{columns}
+    
+\end{frame}
+
+
+
+%%% Changepoint Skeletons: results %%% 
+
+\begin{frame}{Motivation for Trend Segmentation}
+\framesubtitle{Distance between ``changepoint skeletons"}
+
+Clusters from the new procedure contain time series with similar behaviour before and after the shock:
+
+\bigskip
+
+\begin{figure}
+    \centering
+    \begin{subfigure}
+        \includegraphics[width = 0.3\textwidth]{../plots/SnP500_frechet_similar_1.png}
+    \end{subfigure}
+    \begin{subfigure}
+        \includegraphics[width = 0.3\textwidth]{../plots/SnP500_frechet_similar_2.png}    
+    \end{subfigure}
+    \begin{subfigure}
+        \includegraphics[width = 0.3\textwidth]{../plots/SnP500_frechet_similar_3.png}
+    \end{subfigure}
+\end{figure}
+    
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 2: Univariate Trend Segmentation Methods %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Univariate Trend Segmentation}
+
+
+
+%%% Table of contents %%%
+
+\begin{frame}{Roadmap}
+\tableofcontents[currentsection]
+\end{frame}
+
+
+
+
+%%% Comparison with mean-shift methods %%%
+
+\begin{frame}{Mean-Shift Methods Are Not Your Friend!}
+
+\begin{itemize}
+
+    \item Exact search is (NP) hard - \cite{weinmann2015iterative}
+
+    \item Naive approach based on differencing fails even at performing signal recovery - \cite{maidstone2016efficient}
+    
+    \item Top down approach is inconsistent - \cite{baranowski2019narrowest}
+    
+\end{itemize}
+
+\end{frame}
+
+
+
+%%% Trend segmentation as discrete optimisation %%% 
+
+\begin{frame}{Trend Segmentation as Discrete Optimisation}
+
+Trend segmentation can be posed as a discrete discrete optimisation problem. A solution can be found using exhaustive search - see \cite{tome2004piecewise} and \cite{karl2000record} - but this takes $\mathcal{O}(2^T)$ time!
+
+\begin{align*}
+    \boldsymbol{\widehat{\theta}} & = \underset{\boldsymbol{\theta} \in \Theta}{\arg\min} \left \{ \sum_{i=0}^{N-1} \mathcal{C} \left ( \left \{ X_t \right \}_{\tau_i+1}^{\tau_{i+1}}; \boldsymbol{\theta} \right ) + N \cdot \lambda_{(T, \sigma)} \right \} \\
+     \onslide<2->{ & \underset{\mathcal{N}}{=} \underset{\boldsymbol{\theta} \in \Theta}{\arg\min} \left \{ \sum_{i=0}^{N-1} \left [ \frac{1}{\sigma^2} \sum_{t = \tau_i + 1}^{\tau_{i+1}}
+    \left ( X_t - \left ( \theta_{1, \tau_{i+1}} + t \cdot \theta_{2,\tau_{i+1}} \right ) \right )^2\right ] + N \cdot \lambda_{(T, \sigma)} \right \}}
+\end{align*}
+
+\end{frame}
+
+
+
+%%% Dynamic programming %%% 
+
+\begin{frame}{Optimisation by Dynamic Programming}
+\framesubtitle{Methods for avoiding exhaustive search}
+    
+\cite{maidstone2017detecting} propose a dynamic programming solution. Let $\mathcal{T}_t$ be set of all possible changepoints on $[1,t]$. Define the cost of optimal segmentation over $[1,t]$ as follows:
+
+\begin{align*}
+    h^t(z) & = \underset{\boldsymbol{\tau},k,\left \{z_t \right \}_0^k}{\min} \left \{ \sum_{i=0}^{k-1} \mathcal{C} \left ( \left \{ X_t \right \}_{\tau_i+1}^{\tau_{i+1}}; z_{\tau_i}, z_{\tau_{i+1}} \right ) + ... \\
+    & \hspace{2cm} ... + \mathcal{C} \left ( \left \{ X_t \right \}_{\tau_k+1}^{t}; z_{\tau_i}, z_{\tau_{i+1}} \right ) + \lambda \cdot (k+1) \left.  \right \} \\
+    & = \underset{z',s}{\min} \left \{ h^s(z') + \mathcal{C} \left ( \left \{ X_t \right \}_{s+1}^t; z',z \right ) + \lambda \right \}
+\end{align*}
+
+Letting $h^t(z) = \min_{\boldsymbol{\tau} \in \mathcal{T}_t} \left \{ h_{\boldsymbol{\tua}}^t(z) \right \}$, minimising $h^T(z)$ solves the segmentation problem. \underline{Functional pruning}: for $s < t$ if $\boldsymbol{\tau}$ is not optimal over $[1,s]$ then $\left ( \boldsymbol{\tau}, s \right )$ will not be optimal over $[1,t]$.
+
+\end{frame}
+
+
+
+%%% Greedy optimisation (motivation) %%%
+
+\begin{frame}{Greedy Optimisation}
+\framesubtitle{Greedy approximation works well for mean shift problems, does it generalise?}
+
+Greedy solution could be found by recursively applying generalised likelihood ratio test to regions of the signal. For $0<s<b<e\leq T$ let $m \left ( \cdot \right )$ be monotone increasing. Define $\chi_{(s,b,e)} \equiv \chi_{(s,b,e)} \left ( \left \{ x_t \right \}_{s}^e \right )$ as:
+
+\begin{align*}
+    \chi_{(s,b,e)} & = m \left ( \left | 
+    2\log \left \{ \frac{\underset{\boldsymbol{\theta_1,\theta_2}}{\sup} \hspace{0.2cm} \mathcal{L} \left ( \left \{ X_t \right \}_s^b; \boldsymbol{\theta_1} \right ) \times \mathcal{L} \left ( \left \{ X_t \right \}_{b+1}^e; \boldsymbol{\theta_2} \right )}{\underset{\boldsymbol{\theta}}{\sup} \hspace{0.2cm} \mathcal{L} \left ( \left \{ X_t \right \}_s^e; \boldsymbol{\theta} \right )} \right \}
+    \right | \right ) \\
+    \onslide<2->{& \underset{\mathcal{N}+\text{pcwsConst}}{=} \left | \sqrt{\frac{e-b}{l \left ( b - s + 1\right )}}\sum_{t=1}^b X_t - \sqrt{\frac{b-s+1}{l \left ( e-b \right )}} \sum_{t=b+1}^e X_t \right |} 
+\end{align*}
+
+\onslide<3->{With $l = e - s + 1$. Consistency in the mean shift case first proved by \cite{vostrikova1981detecting}. Trend segmentation is a more delicate problem...}
+    
+\end{frame}
+
+
+
+%%% GIF: failure of greedy optimisation %%%
+
+\begin{frame}{Greedy Optimisation}
+\framesubtitle{Greedy optimisation fails in practice, top down approaches need to be localised!}
+
+\begin{figure}[h]
+	\centering
+	\animategraphics[loop,controls,width=0.55\linewidth]{10}{../plots/pscwLin_CUSUM_gif/CUSUM_}{1}{295}
+\end{figure}
+
+\end{frame}
+
+
+
+%%% NOT and ID algorithms %%%
+
+\begin{frame}{Conditionally-Greedy Optimisation}
+\framesubtitle{Detection with single changepoint intervals}
+
+\begin{itemize}
+    \item \cite{baranowski2019narrowest}: draw intervals of random size, test each interval for changepoints, assign changepoint to the \textit{narrowest} interval, reccur. 
+    \bigskip
+    \item \cite{anastasiou2019detecting}: test left and right expanding intervals, at each step expand interval by the minimum permitted distance between changepoints, reccur.
+\end{itemize}
+    
+\end{frame}
+
+
+
+%%% Introduce TGUW %%%
+
+\begin{frame}{Tail-Greedy Optimisation}
+\framesubtitle{Bottom up data decomposition}
+
+\cite{maeng2019detecting} propose bottom up wavelet recovery scheme based on recursively merging regions of the signal which `deviate the least' from linearity: 
+
+\bigskip
+
+\begin{enumerate}
+    \item Conditionally orthonormal decomposition of observed signal
+    \item Hard threshold of detail coefficients 
+    \item Inverse transform on thresholded sequence for signal recovery 
+    \item Post-process for changepoint recovery
+\end{enumerate}
+
+\bigskip
+
+In practice multiple merges are performed with each recursive step through the tail greedy mechanism of \cite{fryzlewicz2018tail}.
+\end{frame}
+
+
+
+%%% Visualise TGUW decomposition %%%
+
+\begin{frame}{Tail-Greedy Optimisation}
+\framesubtitle{Bottom up data decomposition}
+
+\begin{figure}[h]
+	\centering
+	\animategraphics[loop,controls,width=0.55\linewidth]{10}{../plots/TGUW_gif/TGUW_}{1}{96}
+\end{figure}
+
+\end{frame}
+
+
+
+%%% Convex relaxations %%%
+
+\begin{frame}{Convex Relaxations}
+\framesubtitle{Applicable signal recovery methods}
+
+For signal recovery penalise how much, as opposed to how many times, the slope varies. Proposed by \cite{kim2009ell_1} and generalised by \cite{tibshirani2014adaptive}.
+
+\begin{align*}
+    \boldsymbol{\widehat{f}} & = \underset{N \in \mathbb{N}^*}{\min} \left \{ \underset{f_{\tau_1},...,f_{\tau_N}}{\arg\min} \left \{ \sum_{i=0}^{N-1} \sum_{t = \tau_i + 1}^{\tau_{i+1}}
+    \left ( X_t - f_{\tau_{i+1}} (t) \right )^2 + N \cdot \lambda_{(T, \sigma)} \right \} \right \} \\
+    \onslide<2->{& = \underset{\boldsymbol{f} \in \mathbb{R}^T}{\arg\min} \left \{ \left \| \boldsymbol{X - f} \right \|_2^2 + \lambda_{(T,\sigma)} \cdot \left \| \Delta^2 \boldsymbol{f}  \right \|_0 \right \} }\\
+    \onslide<3->{& \sim \underset{\boldsymbol{f} \in \mathbb{R}^T}{\arg\min} \left \{ \left \| \boldsymbol{X - f} \right \|_2^2 + \lambda_{(T,\sigma)} \cdot \left \| \Delta^2 \boldsymbol{f}  \right \|_1 \right \}}
+\end{align*}
+    
+ \onslide<4->{Changepoint consistency in mean shift setting (i.e. $\lambda_{(T,\sigma)} \cdot \left \| \Delta \boldsymbol{f} \right \|_1$) shown by \cite{rojas2014change} and \cite{lin2017sharp}.}   
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 3: Extensions to Multivariate Data %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Extensions to Multivariate Data}
+
+
+
+%%% Table of contents %%%
+
+\begin{frame}{Roadmap}
+\tableofcontents[currentsection]
+\end{frame}
+
+
+
+%%% Aggregating raw data %%%
+
+\begin{frame}{Aggregating Raw Data}
+\framesubtitle{Projection based methods}
+    
+\textcolor{red}{TBF}
+    
+\begin{itemize}
+    \item \cite{grundy2020high} - distance and angle from fixed reference point.
+    \item \cite{wang2018high} - convex relaxation to optimal projection problem. 
+    \item \cite{aston2014efficiency} - oracle projection and random projection. 
+\end{itemize}
+    
+\end{frame}
+
+
+
+%%% Aggregating transformed data %%%
+
+\begin{frame}{Aggregating Transformed Data}
+\framesubtitle{Aggregation of $n$ univariate signals}
+
+\textcolor{red}{TBF}
+
+Optimal methods for aggregating cross-sectional changepoint information... 
+
+\begin{align*}
+    & \mathcal{X}_{(s,b,e)} = \left (\chi_{(s,b,e)}^1, ..., \chi_{(s,b,e)}^n \right )' \\
+    & \mathcal{D}_{(p,q,r)} = \left ( d_{(p,q,r)}^1, ..., d_{(p,q,r)}^n \right ) '  
+\end{align*}
+    
+\end{frame}
+
+\begin{frame}{Cross-Sectional Aggregation Methods}
+\framesubtitle{Aggregation of $n$ univariate signals}
+    
+\textcolor{red}{TBF}
+    
+\begin{itemize}
+    \item $l_1$ aggregation + sparsification step - \cite{cho2015multiple}: $\sum_{j=1}^n \left | \chi^j_{(s,b,e)} \right | \cdot \mathcal{I} \left ( \left | \chi^j_{(s,b,e)} \right | > \pi(T) \right ) $ penalise spuriously large CUSUM values. 
+    \item $l_2$ aggregation - \cite{enikeeva2013high}: $g_1(T,b) \cdot \left \| \mathcal{X}_{(s,b,e)} \right \|_2 + g_2(n)$.
+    \item $l_\infty$ aggregation - \cite{maeng2019adaptive}: $\left \| \mathcal{D}_{p,q,r} \right \|_\infty$ delaying the merge of regions in which at least one data sequence includes an extremely large size of change. 
+    \item Ranking-based aggregation \cite{cho2015multiple} - partition components into those with change and those without. 
+\end{itemize}
+    
+\end{frame}
+
+
+
+%%% Methods from functional data analysis %%%
+
+\begin{frame}{Landmark Feature Intensity}
+
+    \textcolor{red}{TBC}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 4: Changepoint PCA %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Changepoint PCA}
+
+
+
+%%% Table of contents %%%
+
+\begin{frame}{Roadmap}
+\tableofcontents[currentsection]
+\end{frame}
+
+
+
+%%% Motivation for factor model
+
+\begin{frame}{Motivation for Changepoint Factor Model}
+\framesubtitle{S\&P 500 around COVID-19 outbreak}
+    
+\textcolor{red}{TBF}
+    
+\begin{figure}
+    \centering
+    \includegraphics[width = 0.6\textwidth]{../plots/SnP_500_COVID_changepoints.png}
+\end{figure}
+    
+\end{frame}
+
+
+
+%%% Explicit Basis Recovery Problem %%%
+
+\begin{frame}{From Factor Model to Changepoint PCA}
+\framesubtitle{Trend segmentation as a basis recovery problem}
+
+Piecewise linear signals $\left \{ f_i \right \}_{i=1}^n$ share common changepoints $\left \{ \tau_i \right \}_{i=1}^N$ and so implicitly share a common basis. Changepoint recovery is equivalent to basis recovery: 
+
+\begin{align*}
+    \boldsymbol{X_t} & = \left ( f_1(t) + .. + f_n(t) \right ) ' + \boldsymbol{\varepsilon}_t \\
+    \onslide<2->{& = \left ( \sum_{j=0}^{N+1} \lambda_{1,j} \phi_j(t) + ... + \sum_{j=0}^{N+1} \lambda_{n,j} \phi_j(t) \right )' + \boldsymbol{\varepsilon}_t} \\
+    \onslide<3->{& = \begin{pmatrix}
+        \lambda_{1,0} & \cdots  & \lambda_{1,N+1}\\ 
+    \lambda_{2,0} & \cdots  & \lambda_{2,N+1}\\ 
+    \vdots  & \ddots  & \vdots  \\ 
+    \lambda_{n,0} & \cdots  & \lambda_{n,N+1} 
+    \end{pmatrix} 
+    \begin{pmatrix}
+    \phi_0(t)\\ 
+    \vdots \\ 
+    \phi_{N+1}(t)
+    \end{pmatrix} + \boldsymbol{\varepsilon}_t} \\
+    \onslide<4->{& = \Lambda \Phi \left ( t \right ) + \boldsymbol{\varepsilon_t}}
+\end{align*}
+
+
+\end{frame}
+
+
+
+%%% (More) motivation for factor model
+
+\begin{frame}{Motivation for Changepoint Factor Model}
+\framesubtitle{Changepoints in periods of historically low volatility}
+
+If changepoints are sufficiently aligned we can pool cross-sectional information for basis recovery. Will a factor model always appropriate in practice?
+
+\begin{figure}
+    \centering
+    \begin{subfigure}
+        \includegraphics[width = 0.4\textwidth]{../plots/SnP500_LR_COVID.png}
+    \end{subfigure}
+    \begin{subfigure}
+        \includegraphics[width = 0.4\textwidth]{../plots/SnP500_LR_lowvol.png}
+    \end{subfigure}
+\end{figure}
+
+\end{frame}
+
+
+
+%%% (More) motivation for factor model
+
+\begin{frame}{Motivation for Changepoint Factor Model}
+\framesubtitle{Changepoints in periods of historically low volatility}
+
+\begin{figure}[h]
+	\centering
+	\animategraphics[loop,controls,width=0.55\linewidth]{10}{../plots/snp_perm_gif/snp_perm_}{1}{268}
+\end{figure}
+
+\end{frame}
+
+
+
+%%% Strong idiosyncratic components %%%
+
+\begin{frame}{Digression}
+\framesubtitle{Dealing with strong idiosyncratic components}
+
+\textcolor{red}{TBF}
+
+\begin{enumerate}
+    \item Non-pervasive shocks in factor models: \cite{luciani2014forecasting}
+    \item `lava' estimator: \cite{chernozhukov2017lava}
+\end{enumerate}
+
+\end{frame}
+
+
+
+%%% Connection to functional PCA %%%
+
+\begin{frame}{Connection to Functional PCA}
+    
+    \textcolor{red}{TBC}
+    
+\end{frame}
+
+
+% finally, to allow references on multiple pages 
+% add [allowframebreaks]
+
+\begin{frame}{References}
+\bibliographystyle{ksfh_nat}
+\bibliography{ref}
+\end{frame}
+
+\end{document}
