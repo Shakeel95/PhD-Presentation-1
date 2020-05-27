@@ -32,7 +32,7 @@
 \\
   {Shakeel Gavioli-Akilagun} \\
   \bigskip
-  \footnotesize{Supervisors: Prof. Piotr Fryzlewicz / Dr. Clifford Lam}
+  \footnotesize{Supervisor: Prof. Piotr Fryzlewicz}
 }
 
 \date[02 June 2020]{
@@ -41,6 +41,8 @@
   \hspace{1cm}\\
   {\fontfamily{pcr}\selectfont \href{https://github.com/Shakeel95/PhD-Presentation-1}{GitHub} }
 }
+
+\setcounter{tocdepth}{1}
 
 \begin{document}
 
@@ -78,72 +80,8 @@
 
 
 
-
-
-%%% Model Setup %%%
-
-\begin{frame}{Model Setup}
-\framesubtitle{Univariate trend segmentation}
-
-Given a sample $\left \{ X_t \right \}_{t=1}^{T}$ assume a `signal + noise' model $X_t = f(t) + \varepsilon_t$ with $\varepsilon_t \sim \left ( 0, \sigma^2 \right )$ and $f(t)$ can be segmented into $N+1$ linear segments with breaks at $1 = \tau_0 < \tau_1 < \dots \tau_N < \tau_{N+1}=T$. Specifically: 
-
-\bigskip
-
-\begin{equation*}
-f(t) = 
-\left\{\begin{matrix}
-        \theta_{1,\tau_1} + t \cdot \theta_{2,\tau_1} & t \in [1, \tau_1) \\ 
-        \theta_{1,\tau_2} + t \cdot \theta_{2,\tau_2} & t \in [\tau_2, \tau_3)\\ 
-        \vdots & \\ 
-        \theta_{1,\tau_N} + t \cdot \theta_{2,\tau_N} & t \in [\tau_N,T]
-\end{matrix}\right.
-\end{equation*}
-
-\bigskip
-
-Both $N$ and $\left \{ \tau_1, \dots \tau_N \right \}$ are unknown.
-
-\end{frame}
-
-
-
-%%% Multivariate trend segmentation %%%
-
-\begin{frame}{Model Setup}
-\framesubtitle{Multivariate trend segmentation}
-
-From a sample $\left \{ \boldsymbol{X}_t \right \}_{t=1}^T$ assume a multivariate `signal + noise' model $\boldsymbol{X_t} = \boldsymbol{F}(t) + \boldsymbol{\varepsilon}_t$ with $\boldsymbol{\varepsilon}_t \sim \left ( \boldsymbol{0}, \Sigma \right )$ and $\boldsymbol{F}(t)$ is the concatenation of $n$ piecewise constant function. Specifically: 
-
-\bigskip
-
-\begin{itemize}
-    \item $\boldsymbol{X_t} = \left ( X_{1,t},...,X_{n,t}\right )'$
-    \item $\boldsymbol{F}(t) = \left ( f_1(t), ..., f_n(t)\right )'$
-    \item $\left \{ f_i\right \}_{i=1}^n$ share common changepoints $\left \{ \tau_j \right \} _{j=1}^N$
-\end{itemize}
-
-\bigskip
-
-We may have that $T \ll n$. 
-
-\end{frame}
-
-%%% Modelling Objectives %%%
-
-\begin{frame}{Model Setup}
-\framesubtitle{Objectives of trend segmentation}
-
-\doublespacing
-The goal is to construct estimates $\left ( \boldsymbol{\widehat{\theta}}, \boldsymbol{\widehat{f}} \right )$ where $\boldsymbol{f} = \left \{ f(t) \right \}_{t=1}^T$ and  $\boldsymbol{\widehat{\theta}} = \left ( \widehat{N}, \widehat{\tau}_1, ..., \widehat{\tau}_{\widehat{N}}, \right )$ which allow us to perform one or both of the following tasks with some guarantee of statistical accuracy.
-
-\bigskip
-
-\begin{enumerate}
-    \item Changepoint recovery $\mathbb{P} \left ( \widehat{N} = N, \underset{j}{\max} \left | \widhat{\tau_j} - \tau_j \right | \leq g(T) \right ) \rightarrow 1 $
-    \item Signal recovery $\mathbb{P} \left ( \left \| \boldsymbol{\widehat{f} - f} \right \|_p \leq g(T) \right ) \rightarrow 1 $
-\end{enumerate}
-
-\end{frame}
+%%% SS %%%
+\subsection{motivation for trend segmentation}
 
 
 
@@ -278,6 +216,87 @@ Clusters from the new procedure contain time series with similar behaviour befor
 
 
 
+%% SS %%
+\subsection{Derived Model}
+
+
+
+%%% Model Setup %%%
+
+\begin{frame}{Derived Model}
+\framesubtitle{Univariate trend segmentation}
+
+Given a sample $\left \{ X_t \right \}_{t=1}^{T}$ assume a `signal + noise' model $X_t = f(t) + \varepsilon_t$ with $\varepsilon_t \sim \left ( 0, \sigma^2 \right )$ and $f(t)$ can be segmented into $N+1$ linear segments with breaks at $0 = \tau_0 < \tau_1 < \dots \tau_N < \tau_{N+1}=T$. Specifically: 
+
+\bigskip
+
+\begin{equation*}
+f(t) = 
+\left\{\begin{matrix}
+        \theta_{1,\tau_1} + t \cdot \theta_{2,\tau_1} & t \in (\tau_0, \tau_1] \\ 
+        \theta_{1,\tau_2} + t \cdot \theta_{2,\tau_2} & t \in (\tau_2, \tau_3]\\ 
+        \vdots & \\ 
+        \theta_{1,\tau_N} + t \cdot \theta_{2,\tau_N} & t \in (\tau_N,\tau_{N+1}]
+\end{matrix}\right.
+\end{equation*}
+
+\bigskip
+
+Both $N$ and $\left \{ \tau_1, \dots \tau_N \right \}$ are unknown.
+
+\end{frame}
+
+
+
+%%% Multivariate trend segmentation %%%
+
+\begin{frame}{Derived Model}
+\framesubtitle{Multivariate trend segmentation}
+
+From a sample $\left \{ \boldsymbol{X}_t \right \}_{t=1}^T$ assume a multivariate `signal + noise' model $\boldsymbol{X_t} = \boldsymbol{F}(t) + \boldsymbol{\varepsilon}_t$ with $\boldsymbol{\varepsilon}_t \sim \left ( \boldsymbol{0}, \Sigma \right )$ and $\boldsymbol{F}(t)$ is the concatenation of $n$ piecewise constant function. Specifically: 
+
+\bigskip
+
+\begin{itemize}
+    \item $\boldsymbol{X_t} = \left ( X_{1,t},...,X_{n,t}\right )'$
+    \item $\boldsymbol{F}(t) = \left ( f_1(t), ..., f_n(t)\right )'$
+    \item $\left \{ f_i\right \}_{i=1}^n$ share common changepoints $\left \{ \tau_j \right \} _{j=1}^N$
+\end{itemize}
+
+\bigskip
+
+We may have that $T \ll n$. 
+
+\end{frame}
+
+
+
+
+%%% Modelling Objectives %%%
+
+\begin{frame}{Derived Model}
+\framesubtitle{Objectives of trend segmentation}
+
+%\doublespacing
+The goal is to construct estimates $\left ( \boldsymbol{\widehat{\theta}}, \boldsymbol{\widehat{f}} \right )$ where $\boldsymbol{f} = \left \{ f(t) \right \}_{t=1}^T$ and  $\boldsymbol{\widehat{\theta}} = \left ( \widehat{N}, \widehat{\tau}_1, ..., \widehat{\tau}_{\widehat{N}} \right )$ which allow us to perform one or both of the following tasks with some guarantee of statistical accuracy.
+
+\bigskip
+
+\begin{enumerate}
+    \item Changepoint recovery $\mathbb{P} \left ( \widehat{N} = N, \underset{j}{\max} \left | \widhat{\tau_j} - \tau_j \right | \leq g(T) \right ) \rightarrow 1 $
+    \item Signal recovery $\mathbb{P} \left ( \left \| \boldsymbol{\widehat{f} - f} \right \|_p \leq g(T) \right ) \rightarrow 1 $
+\end{enumerate}
+
+\bigskip
+
+As $T$ (and $n$) $\rightarrow \infty$.
+
+\end{frame}
+
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 2: Univariate Trend Segmentation Methods %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -292,6 +311,10 @@ Clusters from the new procedure contain time series with similar behaviour befor
 \tableofcontents[currentsection]
 \end{frame}
 
+
+
+%% SS %%
+\subsection{Pose discrete optimisation problem}
 
 
 
@@ -339,12 +362,17 @@ Trend segmentation can be posed as a discrete discrete optimisation problem. A s
 \begin{align*}
     h^t(z) & = \underset{\boldsymbol{\tau},k,\left \{z_t \right \}_0^k}{\min} \left \{ \sum_{i=0}^{k-1} \mathcal{C} \left ( \left \{ X_t \right \}_{\tau_i+1}^{\tau_{i+1}}; z_{\tau_i}, z_{\tau_{i+1}} \right ) + ... \\
     & \hspace{2cm} ... + \mathcal{C} \left ( \left \{ X_t \right \}_{\tau_k+1}^{t}; z_{\tau_i}, z_{\tau_{i+1}} \right ) + \lambda \cdot (k+1) \left.  \right \} \\
-    & = \underset{z',s}{\min} \left \{ h^s(z') + \mathcal{C} \left ( \left \{ X_t \right \}_{s+1}^t; z',z \right ) + \lambda \right \}
+    \onslide<2->{& = \underset{z',s}{\min} \left \{ h^s(z') + \mathcal{C} \left ( \left \{ X_t \right \}_{s+1}^t; z',z \right ) + \lambda \right \}}
 \end{align*}
 
-Letting $h^t(z) = \min_{\boldsymbol{\tau} \in \mathcal{T}_t} \left \{ h_{\boldsymbol{\tua}}^t(z) \right \}$, minimising $h^T(z)$ solves the segmentation problem. \underline{Functional pruning}: for $s < t$ if $\boldsymbol{\tau}$ is not optimal over $[1,s]$ then $\left ( \boldsymbol{\tau}, s \right )$ will not be optimal over $[1,t]$.
+\onslide<3->{Letting $h^t(z) = \min_{\boldsymbol{\tau} \in \mathcal{T}_t} \left \{ h_{\boldsymbol{\tua}}^t(z) \right \}$, minimising $h^T(z)$ solves the segmentation problem. \underline{Functional pruning}: for $s < t$ if $\boldsymbol{\tau}$ is not optimal over $[1,s]$ then $\left ( \boldsymbol{\tau}, s \right )$ will not be optimal over $[1,t]$.}
 
 \end{frame}
+
+
+
+%% SS %%
+\subsection{Greedy optimisation}
 
 
 
@@ -397,9 +425,14 @@ Greedy solution could be found by recursively applying generalised likelihood ra
 
 
 
+%% SS %%
+\subsection{Tail greedy optimisation}
+
+
+
 %%% Introduce TGUW %%%
 
-\begin{frame}{Tail-Greedy Optimisation}
+\begin{frame}{Generous Optimisation}
 \framesubtitle{Bottom up data decomposition}
 
 \cite{maeng2019detecting} propose bottom up wavelet recovery scheme based on recursively merging regions of the signal which `deviate the least' from linearity: 
@@ -422,7 +455,7 @@ In practice multiple merges are performed with each recursive step through the t
 
 %%% Visualise TGUW decomposition %%%
 
-\begin{frame}{Tail-Greedy Optimisation}
+\begin{frame}{Generous Optimisation}
 \framesubtitle{Bottom up data decomposition}
 
 \begin{figure}[h]
@@ -431,6 +464,11 @@ In practice multiple merges are performed with each recursive step through the t
 \end{figure}
 
 \end{frame}
+
+
+
+%% SS %% 
+\subsection{Convex relaxations}
 
 
 
@@ -518,15 +556,6 @@ Optimal methods for aggregating cross-sectional changepoint information...
 
 
 
-%%% Methods from functional data analysis %%%
-
-\begin{frame}{Landmark Feature Intensity}
-
-    \textcolor{red}{TBC}
-
-\end{frame}
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 4: Changepoint PCA %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -547,42 +576,32 @@ Optimal methods for aggregating cross-sectional changepoint information...
 
 \begin{frame}{Motivation for Changepoint Factor Model}
 \framesubtitle{S\&P 500 around COVID-19 outbreak}
+
+
+\begin{columns}
+
+    \begin{column}{0.5\textwidth}
+	
+	Changepoints in the S\&P 500 dataset seem roughly aligned. This suggests a factor model may be appropriate:
+	
+	\begin{equation*}
+		\boldsymbol{X_t = \Lambda F_t + \varepsilon_t}
+	\end{equation*}		
+	
+	\bigskip	
+	
+	Where $\boldsymbol{F}_t \in \mathbb{R}^{q}$ with $q=N+2$ contains information on the \textit{location} of changepoints and $\Lambda \in \mathbb{R}^{n \times q}$ contains information on their \textit{intensity}.
+	
+    \end{column}
     
-\textcolor{red}{TBF}
+    \begin{column}{0.5\textwidth}
+		\begin{figure}
+    			\centering
+    			\includegraphics[width = \textwidth]{../plots/SnP_500_COVID_changepoints.png}
+		\end{figure}
+    \end{column}
     
-\begin{figure}
-    \centering
-    \includegraphics[width = 0.6\textwidth]{../plots/SnP_500_COVID_changepoints.png}
-\end{figure}
-    
-\end{frame}
-
-
-
-%%% Explicit Basis Recovery Problem %%%
-
-\begin{frame}{From Factor Model to Changepoint PCA}
-\framesubtitle{Trend segmentation as a basis recovery problem}
-
-Piecewise linear signals $\left \{ f_i \right \}_{i=1}^n$ share common changepoints $\left \{ \tau_i \right \}_{i=1}^N$ and so implicitly share a common basis. Changepoint recovery is equivalent to basis recovery: 
-
-\begin{align*}
-    \boldsymbol{X_t} & = \left ( f_1(t) + .. + f_n(t) \right ) ' + \boldsymbol{\varepsilon}_t \\
-    \onslide<2->{& = \left ( \sum_{j=0}^{N+1} \lambda_{1,j} \phi_j(t) + ... + \sum_{j=0}^{N+1} \lambda_{n,j} \phi_j(t) \right )' + \boldsymbol{\varepsilon}_t} \\
-    \onslide<3->{& = \begin{pmatrix}
-        \lambda_{1,0} & \cdots  & \lambda_{1,N+1}\\ 
-    \lambda_{2,0} & \cdots  & \lambda_{2,N+1}\\ 
-    \vdots  & \ddots  & \vdots  \\ 
-    \lambda_{n,0} & \cdots  & \lambda_{n,N+1} 
-    \end{pmatrix} 
-    \begin{pmatrix}
-    \phi_0(t)\\ 
-    \vdots \\ 
-    \phi_{N+1}(t)
-    \end{pmatrix} + \boldsymbol{\varepsilon}_t} \\
-    \onslide<4->{& = \Lambda \Phi \left ( t \right ) + \boldsymbol{\varepsilon_t}}
-\end{align*}
-
+\end{columns}
 
 \end{frame}
 
@@ -593,7 +612,7 @@ Piecewise linear signals $\left \{ f_i \right \}_{i=1}^n$ share common changepoi
 \begin{frame}{Motivation for Changepoint Factor Model}
 \framesubtitle{Changepoints in periods of historically low volatility}
 
-If changepoints are sufficiently aligned we can pool cross-sectional information for basis recovery. Will a factor model always appropriate in practice?
+But a factor models require some minimal amount of common structure. Is it always reasonable to assume changepoints across the panel will exhibit this structure? 
 
 \begin{figure}
     \centering
@@ -623,17 +642,29 @@ If changepoints are sufficiently aligned we can pool cross-sectional information
 
 
 
-%%% Strong idiosyncratic components %%%
+%%% Explicit Basis Recovery Problem %%%
 
-\begin{frame}{Digression}
-\framesubtitle{Dealing with strong idiosyncratic components}
+\begin{frame}{From Factor Model to Changepoint PCA}
+\framesubtitle{Trend segmentation as a basis recovery problem}
 
-\textcolor{red}{TBF}
+Piecewise linear signals $\left \{ f_i \right \}_{i=1}^n$ share common changepoints $\left \{ \tau_i \right \}_{i=1}^N$ and so implicitly share a common basis. Changepoint recovery is equivalent to basis recovery: 
 
-\begin{enumerate}
-    \item Non-pervasive shocks in factor models: \cite{luciani2014forecasting}
-    \item `lava' estimator: \cite{chernozhukov2017lava}
-\end{enumerate}
+\begin{align*}
+    \boldsymbol{X_t} & = \left ( f_1(t), \dots , f_n(t) \right ) ' + \boldsymbol{\varepsilon}_t \\
+    \onslide<2->{& = \left ( \sum_{j=1}^{q} \lambda_{1,j} \phi_j(t), \dots , \sum_{j=1}^{q} \lambda_{n,j} \phi_j(t) \right )' + \boldsymbol{\varepsilon}_t} \\
+    \onslide<3->{& = \begin{pmatrix}
+        \lambda_{1,1} & \cdots  & \lambda_{1,q}\\ 
+    \lambda_{2,1} & \cdots  & \lambda_{2,q}\\ 
+    \vdots  & \ddots  & \vdots  \\ 
+    \lambda_{n,1} & \cdots  & \lambda_{n,q} 
+    \end{pmatrix} 
+    \begin{pmatrix}
+    \phi_1(t)\\ 
+    \vdots \\ 
+    \phi_{q}(t)
+    \end{pmatrix} + \boldsymbol{\varepsilon}_t} \\
+    \onslide<4->{& = \underline{\underline{\Lambda \Phi \left ( t \right ) + \boldsymbol{\varepsilon_t}}}}
+\end{align*}
 
 \end{frame}
 
@@ -642,18 +673,64 @@ If changepoints are sufficiently aligned we can pool cross-sectional information
 %%% Connection to functional PCA %%%
 
 \begin{frame}{Connection to Functional PCA}
+\framesubtitle{A useful framework for estimating basis functions empirically}    
     
-    \textcolor{red}{TBC}
+Consider instead a bundle of curves $\left ( X_1(\cdot), \dots , X_n(\cdot) \right )$. FPCA finds $q$ orthogonal functions which minimise the $l_2$ reconstruction error: 
+
+\begin{align*}
+	\left ( \xi_1, \dots, \xi_q \right ) & = \underset{\xi_1, \dots, \xi_q}{\arg\min} \left \{ \frac{1}{n} \sum_{i=1}^n \left \| X_i - \widehat{X}_i \right \|_2^2 \right \} \\ 
+	& = \underset{\xi_1, \dots, \xi_q}{\arg\min} \left \{ \frac{1}{n} \sum_{i=1}^n \left \| X_i - \sum_{j=1}^q f_{i,j} \xi_j \right \|_2^2 \right \}
+\end{align*}
+
+\bigskip
+
+This boils down to solving an eigne-analysis problem for the covariance operator. 
     
 \end{frame}
+
+
+
+%%% Connection to FPCA %%%
+
+\begin{frame}{Connection to Functional PCA}
+\framesubtitle{A useful framework for estimating basis functions empirically}
+
+\centering 
+\textbf{Key difference:} in FPCA the set of candidate basis functions is large but the estimation procedure is simple, in our setting the choice of basis functions is obvious but the estimation problem is hard. 
+
+\end{frame}
+
 
 
 % finally, to allow references on multiple pages 
 % add [allowframebreaks]
 
-\begin{frame}{References}
+\begin{frame}[allowframebreaks]{References}
 \bibliographystyle{ksfh_nat}
 \bibliography{ref}
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Supplementary Material %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Supplementary Material}
+ 
+
+
+%%% Strong idiosyncratic components %%%
+
+\begin{frame}{Dealing with strong idiosyncratic components}
+
+We may have that once common changepoints 
+
+\begin{enumerate}
+    \item Non-pervasive shocks in factor models: \cite{luciani2014forecasting}
+    \item `lava' estimator: \cite{chernozhukov2017lava}
+\end{enumerate}
+
 \end{frame}
 
 \end{document}
