@@ -1,3 +1,4 @@
+
 \documentclass{beamer}
 
 % http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
@@ -10,17 +11,23 @@
   \setbeamertemplate{caption}[numbered]
 } 
 
+
+%%% standard packages %%%
 \usepackage[english]{babel}
 \usepackage[utf8x]{inputenc}
 \usepackage{chemfig}
 \usepackage[version=3]{mhchem}
 
+%%% documentation %%%
 \usepackage{hyperref}
 \usepackage{natbib}
 \bibliographystyle{agsm}
 
+%%% spacing, fonts, etc %%%
 \usepackage{setspace}
+\usepackage{amsfonts} 
 
+%%% animate! %%%
 \usepackage{animate}
 \usepackage{xmpmulti}
 
@@ -28,10 +35,11 @@
 \title[Trend Segmentation]{Uses of High Dimensional Trend Segmentation}
 \institute[LSE Department of Statistics]{}
 
+\bigskip
+
 \author[]{
 \\
   {Shakeel Gavioli-Akilagun} \\
-  \bigskip
   \footnotesize{Supervisor: Prof. Piotr Fryzlewicz}
 }
 
@@ -39,7 +47,7 @@
   \hspace{1cm}\\
   PhD Presentation Event\\
   \hspace{1cm}\\
-  {\fontfamily{pcr}\selectfont \href{https://github.com/Shakeel95/PhD-Presentation-1}{GitHub} }
+  {\fontfamily{pcr}\selectfont \href{https://github.com/Shakeel95/PhD-Presentation-1}{$\left \{ \text{code} \right \}$}}
 }
 
 \setcounter{tocdepth}{1}
@@ -115,14 +123,14 @@ A common first step in EDA. Transform time series to stationarity $x_t \equiv \D
 
 \begin{figure}
     \centering
-    \begin{subfigure}
+    \onslide<2->{\begin{subfigure}
         \includegraphics[width = 0.3\textwidth]{../plots/SnP500_cor_similar.png}
-    \end{subfigure}
-        \begin{subfigure}
+    \end{subfigure}}
+        \onslide<3->{\begin{subfigure}
         \includegraphics[width = 0.3\textwidth]{../plots/SnP500_random_selection.png}
-    \end{subfigure}
-        \begin{subfigure}
-        \includegraphics[width = 0.3\textwidth]{../plots/SnP500_cor_dissimilar.png}
+    \end{subfigure}}
+        \onslide<4->{\begin{subfigure}
+        \includegraphics[width = 0.3\textwidth]{../plots/SnP500_cor_dissimilar.png}}
     \end{subfigure}
 \end{figure}
     
@@ -430,29 +438,6 @@ Greedy solution could be found by recursively applying generalised likelihood ra
 
 
 
-%%% Introduce TGUW %%%
-
-\begin{frame}{Generous Optimisation}
-\framesubtitle{Bottom up data decomposition}
-
-\cite{maeng2019detecting} propose bottom up wavelet recovery scheme based on recursively merging regions of the signal which `deviate the least' from linearity: 
-
-\bigskip
-
-\begin{enumerate}
-    \item Conditionally orthonormal decomposition of observed signal
-    \item Hard threshold of detail coefficients 
-    \item Inverse transform on thresholded sequence for signal recovery 
-    \item Post-process for changepoint recovery
-\end{enumerate}
-
-\bigskip
-
-In practice multiple merges are performed with each recursive step through the tail greedy mechanism of \cite{fryzlewicz2018tail}.
-\end{frame}
-
-
-
 %%% Visualise TGUW decomposition %%%
 
 \begin{frame}{Generous Optimisation}
@@ -511,13 +496,11 @@ For signal recovery penalise how much, as opposed to how many times, the slope v
 
 \begin{frame}{Aggregating Raw Data}
 \framesubtitle{Projection based methods}
-    
-\textcolor{red}{TBF}
-    
+        
 \begin{itemize}
-    \item \cite{grundy2020high} - distance and angle from fixed reference point.
-    \item \cite{wang2018high} - convex relaxation to optimal projection problem. 
-    \item \cite{aston2014efficiency} - oracle projection and random projection. 
+    \item Distance and angle from fixed reference point - \cite{grundy2020high}
+    \item Projection direction which maximises signal-to-noise ratio - \cite{wang2018high}
+    \item Projection direction which maximises detection power for the test - \cite{aston2014efficiency}
 \end{itemize}
     
 \end{frame}
@@ -527,31 +510,45 @@ For signal recovery penalise how much, as opposed to how many times, the slope v
 %%% Aggregating transformed data %%%
 
 \begin{frame}{Aggregating Transformed Data}
-\framesubtitle{Aggregation of $n$ univariate signals}
-
-\textcolor{red}{TBF}
-
-Optimal methods for aggregating cross-sectional changepoint information... 
-
-\begin{align*}
-    & \mathcal{X}_{(s,b,e)} = \left (\chi_{(s,b,e)}^1, ..., \chi_{(s,b,e)}^n \right )' \\
-    & \mathcal{D}_{(p,q,r)} = \left ( d_{(p,q,r)}^1, ..., d_{(p,q,r)}^n \right ) '  
-\end{align*}
+\framesubtitle{Methods for aggregating univariate CUSUMs}
+        
+\begin{itemize}
+    \item $l_1$ aggregation + sparsification step to penalise spuriously large CUSUM values - \cite{cho2015multiple}
+    \item $l_2$ aggregation of CUSUM values - \cite{enikeeva2013high} and many others...
+    \item $l_\infty$ aggregation to delaying the merge of regions in which at least one data sequence includes an extremely large size of change - \cite{maeng2019adaptive}
+    \item Ranking-based aggregation to partition components into those with change and those without - \cite{cho2015multiple}
+\end{itemize}
     
 \end{frame}
 
-\begin{frame}{Cross-Sectional Aggregation Methods}
-\framesubtitle{Aggregation of $n$ univariate signals}
+
+
+%%% Landmark Method %%% 
+
+\begin{frame}{The Landmark Method}
+
+
+\begin{columns}
+
+    \begin{column}{0.5\textwidth}
+    For the purpose of curve registration \cite{kneip1992statistical} define the feature intensity as an analogue to density functions. Since \textit{features} are far more general, we can easily adapt their method to changepoints:  
+
+\begin{equation*}
+	\widehat{\mathcal{I}} \left ( t \right ) = \frac{1}{n\cdot h} \sum_{i=1}^n \sum_{\tau \in \theta_i} K \left ( \frac{t - \tau}{h} \right )
+\end{equation*}
+    \end{column}
     
-\textcolor{red}{TBF}
+    \begin{column}{0.5\textwidth}
+    \begin{figure}
+	\centering
+	\includegraphics[width = \textwidth]{../plots/SnP_cpt_intensity.png}
+\end{figure}
+
+    \end{column}
     
-\begin{itemize}
-    \item $l_1$ aggregation + sparsification step - \cite{cho2015multiple}: $\sum_{j=1}^n \left | \chi^j_{(s,b,e)} \right | \cdot \mathcal{I} \left ( \left | \chi^j_{(s,b,e)} \right | > \pi(T) \right ) $ penalise spuriously large CUSUM values. 
-    \item $l_2$ aggregation - \cite{enikeeva2013high}: $g_1(T,b) \cdot \left \| \mathcal{X}_{(s,b,e)} \right \|_2 + g_2(n)$.
-    \item $l_\infty$ aggregation - \cite{maeng2019adaptive}: $\left \| \mathcal{D}_{p,q,r} \right \|_\infty$ delaying the merge of regions in which at least one data sequence includes an extremely large size of change. 
-    \item Ranking-based aggregation \cite{cho2015multiple} - partition components into those with change and those without. 
-\end{itemize}
     
+\end{columns}
+
 \end{frame}
 
 
@@ -585,12 +582,12 @@ Optimal methods for aggregating cross-sectional changepoint information...
 	Changepoints in the S\&P 500 dataset seem roughly aligned. This suggests a factor model may be appropriate:
 	
 	\begin{equation*}
-		\boldsymbol{X_t = \Lambda F_t + \varepsilon_t}
+		\boldsymbol{X_t = \boldsymbol{\mu \left ( t \right )} + \Lambda F_t + \varepsilon_t}
 	\end{equation*}		
 	
 	\bigskip	
 	
-	Where $\boldsymbol{F}_t \in \mathbb{R}^{q}$ with $q=N+2$ contains information on the \textit{location} of changepoints and $\Lambda \in \mathbb{R}^{n \times q}$ contains information on their \textit{intensity}.
+	Where $\boldsymbol{F}_t \in \mathbb{R}^{N}$ contains information on the \textit{location} of changepoints and $\Lambda \in \mathbb{R}^{n \times q}$ contains information on their \textit{intensity}.
 	
     \end{column}
     
@@ -651,19 +648,19 @@ Piecewise linear signals $\left \{ f_i \right \}_{i=1}^n$ share common changepoi
 
 \begin{align*}
     \boldsymbol{X_t} & = \left ( f_1(t), \dots , f_n(t) \right ) ' + \boldsymbol{\varepsilon}_t \\
-    \onslide<2->{& = \left ( \sum_{j=1}^{q} \lambda_{1,j} \phi_j(t), \dots , \sum_{j=1}^{q} \lambda_{n,j} \phi_j(t) \right )' + \boldsymbol{\varepsilon}_t} \\
+    \onslide<2->{& = \left ( \sum_{j=1}^{N+2} \lambda_{1,j} \phi_j(t), \dots , \sum_{j=1}^{N+2} \lambda_{n,j} \phi_j(t) \right )' + \boldsymbol{\varepsilon}_t} \\
     \onslide<3->{& = \begin{pmatrix}
-        \lambda_{1,1} & \cdots  & \lambda_{1,q}\\ 
-    \lambda_{2,1} & \cdots  & \lambda_{2,q}\\ 
+        \lambda_{1,1} & \cdots  & \lambda_{1,N+2}\\ 
+    \lambda_{2,1} & \cdots  & \lambda_{2,N+2}\\ 
     \vdots  & \ddots  & \vdots  \\ 
-    \lambda_{n,1} & \cdots  & \lambda_{n,q} 
+    \lambda_{n,1} & \cdots  & \lambda_{n,N+2} 
     \end{pmatrix} 
     \begin{pmatrix}
     \phi_1(t)\\ 
     \vdots \\ 
-    \phi_{q}(t)
+    \phi_{N+2}(t)
     \end{pmatrix} + \boldsymbol{\varepsilon}_t} \\
-    \onslide<4->{& = \underline{\underline{\Lambda \Phi \left ( t \right ) + \boldsymbol{\varepsilon_t}}}}
+    \onslide<4->{& = \Lambda \Phi \left ( t \right ) + \boldsymbol{\varepsilon_t}} \onslide<5->{= \underline{\underline{\boldsymbol{\mu \left ( t \right )} +  \Lambda \Phi \left ( t \right ) + \boldsymbol{\varepsilon_t}}}}
 \end{align*}
 
 \end{frame}
@@ -702,6 +699,14 @@ This boils down to solving an eigne-analysis problem for the covariance operator
 
 
 
+%%% Questions Frame %%%
+
+\begin{frame}
+	
+\end{frame}
+
+
+
 % finally, to allow references on multiple pages 
 % add [allowframebreaks]
 
@@ -716,13 +721,104 @@ This boils down to solving an eigne-analysis problem for the covariance operator
 %% Supplementary Material %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Supplementary Material}
- 
+\section{Supplementary Materials}
+
+
+
+%%% Table of contents %%%
+
+\begin{frame}{Roadmap}
+\tableofcontents[currentsection]
+\end{frame}
+
+
+
+%%% Why trend segmentation %%% 
+
+\begin{frame}{Why piecewise linear models?}
+
+Changepoint models are useful in applied work as changepoint locations are \textit{interpretable}. When the polynomial order is misspecified mean shift models tend to drastically over estimate the number of changepoints while piecewise linear models still perform well - see \cite{Baranowski}. 
+
+\bigskip
+
+Areas in which the piecewise linear model has been used include: 
+
+\begin{itemize}
+	\item Disease incidence - \cite{Dass2015}
+	\item Geophysical research - \cite{liu2010piecewise}
+	\item Financial time series analysis - \cite{yin2011financial}
+\end{itemize}
+
+
+\end{frame}
+
+
+
+%%% Jump or kink %%%
+
+
+
+\begin{frame}{Jump or kink?}
+
+The presentation has avoided the subtle question of whether to allow discontinuities in $f(\cdot)$ at changepoint locations. Specifically: 
+
+\begin{equation*}
+	\theta_{1,\tau_j} + \tau_j \cdot \theta_{2,\tau_j} \overset{?}{=} \theta_{1,\tau_{j+1}} + \tau_j \cdot \theta_{2,\tau_{j+1}}
+\end{equation*}
+
+\bigskip
+
+\begin{itemize}
+	\item[$\times$] Requires an additional N bases in factor model to model jump size. 
+	\item[\checkmark] For estimating changepoint locations \cite{chen2020jump} show that the local minimax is $\mathcal{O}_p(n^{-1})$ for jumps but falls to $\mathcal{O}_p(n^{-\frac{1}{3}})$ for kinks. 
+\end{itemize}
+
+\end{frame}
+
+
+
+%%% Which basis will you use? (1) %%%
+
+\begin{frame}{Which basis will you use?}
+
+\end{frame}
+
+
+
+%%% Additional uses of changepoint skeletons %%%
+
+\begin{frame}{Additional uses of skeleton distance measure}
+\framesubtitle{Screening for cointegrated time series}
+
+With two cointegrated time series having cointegrating vector $\left ( 1 , -\gamma \right ) '$ and 100 non-stationary noise terms simulations were run to estimate the following quantity:  
+
+\begin{equation*}
+    \mathbb{P}\left ( d(x_1,x_2) < \underset{j\in \left \{ 1, \dots ,n \right \}}{\inf} d(x_1,z_j) \right )
+\end{equation*} 
+
+\bigskip
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    $\gamma$ / dist & $d_F$&$d_1$&$d_1^I$&$d_2$&E-G \\
+     \hline
+    1.5 & 0.780 & 0.820 & 0.835 & 0.825 & 0.800 \\
+    1.0 & 0.820 & 0.825 & 0.810 & 0.790 & 0.785 \\
+    0.5 & 0.640 & 0.575 & 0.670 & 0.610 & 0.555 \\
+    0.1 & 0.025 & 0.010 & 0.045 & 0.005 & 0.050 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\end{frame}
+
 
 
 %%% Strong idiosyncratic components %%%
 
-\begin{frame}{Dealing with strong idiosyncratic components}
+\begin{frame}{Strong idiosyncratic components in factor models}
 
 We may have that once common changepoints 
 
@@ -732,5 +828,29 @@ We may have that once common changepoints
 \end{enumerate}
 
 \end{frame}
+
+
+
+%%% Introduce TGUW %%%
+
+\begin{frame}{Generous Optimisation}
+\framesubtitle{Bottom up data decomposition}
+
+\cite{maeng2019detecting} propose bottom up wavelet recovery scheme based on recursively merging regions of the signal which `deviate the least' from linearity: 
+
+\bigskip
+
+\begin{enumerate}
+    \item Conditionally orthonormal decomposition of observed signal
+    \item Hard threshold of detail coefficients 
+    \item Inverse transform on thresholded sequence for signal recovery 
+    \item Post-process for changepoint recovery
+\end{enumerate}
+
+\bigskip
+
+In practice multiple merges are performed with each recursive step through the tail greedy mechanism of \cite{fryzlewicz2018tail}.
+\end{frame}
+
 
 \end{document}
